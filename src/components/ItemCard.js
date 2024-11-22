@@ -1,31 +1,34 @@
-import { Link } from 'react-router-dom';
 import useData from "../hooks/useData";
 import BasicCard from './BasicCard';
+import { Link } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import { CircularProgress } from "@mui/material";
+import SelectButton from "./SelectButton";
 
-const ItemCard = ({itemName, url, position}) => {
+const ItemCard = ({itemName, url}) => {
 
-    const {data, error, loading} = useData(url);
+    const {data, error, loading} = useData(`https://pokeapi.co/api/v2/pokemon/${itemName}`,'get');
 
     if(loading){
-        return (<h2>...Cargando</h2>);
+        return (<><p>{itemName}</p><CircularProgress /></>);
     }
     if(error!=null){
-        return (<><h4>Error cargando {url}</h4>{error}</>);
-    }
-    if(position!=null){
-        const button = position > 1 ? <button>Challenge</button> : '';
-        return (<>
-            {data==null ? <h3>{position} {itemName}</h3> : (<>
-            <BasicCard position={position} data={data} />
-            {button}
-            </>)}
-        </>);
+        /*return (<Card sx={{ maxWidth: 180 }}><h4>Error cargando {itemName} {url}</h4>{error}
+        </Card>);*/
+        return(<Card sx={{ maxWidth: 180 }}>
+            <BasicCard name={itemName} />
+            <p>{error}</p>
+            <SelectButton name={itemName} />
+        </Card>)
     }
     return (<>
-        {data==null ? <h3>{position} {itemName}</h3> : (
-        <Link to={`/details/${data.name}`} state={data}>
-            <BasicCard position={position} data={data} />
-        </Link>
+        {data==null ? <h3>{itemName}</h3> : (
+            <Card sx={{ maxWidth: 180 }}>
+                <Link to={`/details/${data.name}`} state={data.name}>
+                    <BasicCard name={data.name} front_default={data.sprites.front_default} types={data.types}/>
+                </Link>
+                <SelectButton name={data.name} />
+            </Card>
         )}
     </>);
 }
