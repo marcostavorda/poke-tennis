@@ -44,7 +44,7 @@ const DetailCard = () => {
     const navigate = useNavigate();
 
     const { name } = useParams();
-    const {data, error, loading} = useData(`https://pokeapi.co/api/v2/pokemon/${name}`);
+    const {data, error, loading} = useData(`https://pokeapi.co/api/v2/pokemon/${name}`,'get');
 
     const [expanded, setExpanded] = React.useState(false);
 

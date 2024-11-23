@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { addRankingElements } from "../slices/rankingSlice";
 import { useNavigate } from "react-router-dom";
 import PageTypeSelect from "../components/PageTypeSelect";
+import createRanking from "../utils/createRanking.js";
 
 const PagedList = () => {
 
@@ -35,44 +36,30 @@ const PagedList = () => {
     
     const selectedPokemon = useSelector((state) => state.selected.value);
 
-    function createRanking(listedItems) {
-        let position = 0;
-        let ranking = [];
-        let names = [];
-        while (ranking.length < 10 || ranking.length === listedItems.length){
-            var value = listedItems.at(Math.random()*listedItems.length);
-            //Se comenta validacion ya que a veces quede en loop al obtener valores previamente agregados
-            /*if(names.indexOf(value.name)===-1 && names.indexOf(selectedPokemon)===-1){*/
-                names.push(value.name);
-                ranking.push({name: value.name, position: ++position, selected: false});
-            //}
-        }
-        ranking.push({name: selectedPokemon, position: ++position, selected: true});
-        return ranking;
-    }
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     function addRanking () {
-        const ranking = createRanking(itemsList.results);
+        const ranking = createRanking(itemsList.results, selectedPokemon);
         dispatch( addRankingElements(ranking) );
         navigate("/ranking");
     };
+
+    const selectionInfo = selectedPokemon == null ? <h3>Seleccionar Pokemon</h3> : 
+        <h3>Seleccionado {selectedPokemon} <Button variant="contained" onClick={() => addRanking()} >Iniciar</Button></h3>;
 
     if(loading){ return <p className="App"><CircularProgress /></p> }
     if(error!=null){
         return (<><h2>Error Paginando</h2>{error}</>);
     }
     return(<div className="App">
-        {selectedPokemon == null ? <h3>Seleccionar Pokemon</h3> : 
-        <h3>Seleccionado {selectedPokemon}  <Button variant="contained" onClick={() => addRanking()} >Iniciar</Button>
-        </h3>}
+        {selectionInfo}
         <PageTypeSelect selectedType={selectedType} setSelectedType={setSelectedType} 
         changeUrl={changeUrl} getUrl={getUrl} graphQLUrl={graphQLUrl} />
         <br/>
-        {itemsList!=null && itemsList.previous!=null ? <Button variant="contained" onClick={() => changeUrl(itemsList.previous)} >Anterior</Button> : <></> }
-        {itemsList!=null && itemsList.next!=null ? <Button variant="contained" onClick={() => changeUrl(itemsList.next)}>Siguiente</Button> : <></> }
-        {itemsList!=null && itemsList.results.length > 0 ? <><br/>        
+        {itemsList?.previous!=null ? <Button variant="contained" onClick={() => changeUrl(itemsList.previous)} >Anterior</Button> : <></> }
+        {itemsList?.next!=null ? <Button variant="contained" onClick={() => changeUrl(itemsList.next)}>Siguiente</Button> : <></> }
+        {itemsList?.results.length > 0 ? <><br/>        
         <Grid container justify="center" spacing={2}>
             <Grid item xs={10}>
                 <Grid container alignItems="flex-start" justify="center" spacing={1}>
